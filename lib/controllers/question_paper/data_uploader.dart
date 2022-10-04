@@ -1,8 +1,12 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_auth/firebase_ref/references.dart';
 import 'package:get/get.dart';
+
+import '../../models/question_paper_model.dart';
 
 class DataUploader extends GetxController {
   @override
@@ -13,6 +17,7 @@ class DataUploader extends GetxController {
 
   Future<void> uploadData() async {
     print("Uploading Data ...");
+    final fireStore = FirebaseFirestore.instance;
     final manifestContent = await DefaultAssetBundle.of(Get.context!)
         .loadString("AssetManifest.json");
     final Map<String, dynamic> manifestMap = json.decode(manifestContent);
@@ -20,10 +25,24 @@ class DataUploader extends GetxController {
         .where((path) =>
             path.startsWith("assets/DB/paper") && path.contains(".json"))
         .toList();
-
+    List<QuestionPaperModel> questionPapers = [];
     for (var paper in papersInAssets) {
       String stringPaperContent = await rootBundle.loadString(paper);
-      print(stringPaperContent);
+      questionPapers
+          .add(QuestionPaperModel.fromJson(json.decode(stringPaperContent)));
     }
+    // print('Items number ${questionPapers[0].description}');
+    var batch = fireStore.batch();
+
+    for (var paper in questionPapers) {
+      batch.set(questionPaperRF.doc(paper.id), {
+        "title": paper.title,
+        "image_url": paper.imageUrl,
+        "description": paper.description,
+        "time_seconds": paper.timeSeconds,
+        "questions_count": paper.questions == null ? 0 : paper.questions!.length
+      });
+    }
+    await batch.commit();
   }
 }
