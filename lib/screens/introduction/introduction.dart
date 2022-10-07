@@ -22,8 +22,13 @@ class AppIntroductionScreen extends StatelessWidget {
                 height: 40,
               ),
               const Text(
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: onSurfaceTextColor,
+                      fontWeight: FontWeight.bold),
                   "This is a study app. You can use it as you want. If you understand how this wors, you would be able to scale it. With this you will master firebase backend and flutter backend."),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               AppCircleButton(
                 onTap: () => null,
                 child: const Icon(Icons.arrow_forward, size: 35),
